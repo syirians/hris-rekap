@@ -1,0 +1,224 @@
+<div class="ui-fluid">
+	<div class="ui-g">
+		<div class="ui-g-12">
+			<p-confirmDialog responsive="true" [closable]=false width="425" #cd>
+				<p-footer>
+					<button type="button" pButton label="Ya" (click)="cd.accept()"></button>
+					<button type="button" pButton label="Tidak" (click)="cd.reject()"></button>
+				</p-footer>
+			</p-confirmDialog>
+
+			<p-messages [(value)]="errorShift"></p-messages>
+			<div class="card card-w-title">
+				<h1>{{'frmJadwalKerjaPegawai_title'| translate}}</h1>
+				<div class="ui-g form-group">
+					<div class="ui-g-4">
+						<div class="ui-g-12 ui-md-6">
+							<label>{{'frmJadwalKerjaPegawai_periodeJadwal'|translate}}</label>
+							<p-dropdown id="dropdown" filter="filter" [(ngModel)]="kdPeriodeHead" [options]="listPeriodeHead" [autoWidth]="false"
+							 (onChange)="getKode($event)" [disabled]="disPeriode"></p-dropdown>
+						</div>
+						<div class="ui-g-12 ui-md-6">
+							<label>{{'frmJadwalKerjaPegawai_unitKerja'|translate}}</label>
+							<p-dropdown id="unitKerja" [filter]="true" filterBy="label" [(ngModel)]="kdunitKerja" [options]="listRuangan"
+							 [autoWidth]="false" (onChange)="clearPeriode($event)"></p-dropdown>
+						</div>
+						<div class="ui-g-12 ui-md-12">
+							<p-dataTable [value]="listPeriode" [rows]="18" [paginator]="true" [(selection)]="selectedPeriode" scrollable="true"
+							 (onRowDblclick)="pilihPeriode($event)" [headerCheckboxToggleAllPages]="true" [rowHover]="true">
+								<p-column [style]="{'width':'35px'}">
+									<ng-template pTemplate="header">
+										<p-checkbox [(ngModel)]="checkedAll" (ngModelChange)="checkAll($event)" binary="true"></p-checkbox>
+									</ng-template>
+									<ng-template let-col let-periode="rowData" pTemplate="body">
+										<p-checkbox  [(ngModel)]="periode.status" binary="true" (onChange)="checked(periode)"></p-checkbox>
+										<!-- <p-checkbox *ngIf="periode.tglHistori != null && periode.tglHistoriBefore != null" binary="true" [value]="false"
+										 [disabled]="true" (onChange)="checked(periode)"></p-checkbox> -->
+									</ng-template>
+								</p-column>
+								<p-column field="namaPeriode" header="{{'frmJadwalKerjaPegawai_periode'|translate}}" [style]="{'width':'200px','cursor':'pointer'}"></p-column>
+								<p-column field="tglHistori" header="{{'frmJadwalKerjaPegawai_tglAwalReg'|translate}}" [style]="{'width':'100px','cursor':'pointer'}">
+								<ng-template pTemplate="body" let-status="rowData">
+									<span *ngIf="status.tglBerlakuAwalCurrent !== null && status.tglHistori !== null">{{status.tglBerlakuAwalCurrent * 1000 | date:'dd MMM yyyy'}}</span>
+									<span *ngIf="status.tglBerlakuAwalCurrent == null && status.tglHistori !== null">{{status.tglHistori * 1000 | date:'dd MMM yyyy'}}</span>
+									<span *ngIf="status.tglBerlakuAwalCurrent !== null && status.tglHistori == null">{{status.tglBerlakuAwalCurrent * 1000 | date:'dd MMM yyyy'}}</span>
+									<!-- <span *ngIf="status.tglHistori != null && status.tglHistoriBefore != null">{{status.tglHistoriBefore * 1000
+										| date:'dd MMM yyyy'}}</span>
+									<span *ngIf="status.tglHistori != null && status.tglHistoriBefore == null">{{status.tglHistori * 1000 |
+									date:'dd MMM yyyy'}}</span> -->
+									<span *ngIf="status.tglBerlakuAwalCurrent == null && status.tglHistori == null">-</span>
+								</ng-template>
+							</p-column>
+							<p-column field="tglHistoriBefore" header="{{'frmJadwalKerjaPegawai_tglAwalRekap'|translate}}" [style]="{'width':'100px','cursor':'pointer'}">
+								<ng-template pTemplate="body" let-status="rowData">
+									<span *ngIf="status.tglHistori != null && status.tglHistoriBefore != null">{{status.tglHistoriBefore * 1000 | date:'dd MMM yyyy'}}</span>
+									<!-- <span *ngIf="status.tglHistori != null && status.tglHistoriBefore != null">{{status.tglHistori * 1000 | date:'dd MMM yyyy'}}</span> -->
+									<!-- <span *ngIf="status.tglHistori != null && status.tglHistoriBefore != null">{{status.tglRekap * 1000 | date:'dd MMM yyyy'}}</span> -->
+									<span *ngIf="status.tglHistoriBefore == null">-</span>
+								</ng-template>
+							</p-column>
+							</p-dataTable>
+						</div>
+						<div class="ui-g-12 ui-md-12">
+							<p-fieldset legend="{{'frmJadwalKerjaPegawai_listHariLibur'| translate}}">
+								<div class="ui-g form-group">
+									<div class="ui-g-12" *ngFor="let item of listHariLibur">
+										<div class="ui-g-12 ui-md-6" style="text-align: right;">{{item.namaHariLibur}}</div>
+										<div class="ui-g-12 ui-md-6" style="text-align: right;">{{item.tanggal * 1000 | date:'dd MMM yyyy'}}</div>
+									</div>
+								</div>
+							</p-fieldset>
+						</div>
+					</div>
+					<div class="ui-g-8">
+						<br>
+						<div class="ui-g-12 ui-md-12" style="overflow: auto;max-height: 100vh;">
+							<table style="width: 100%">
+								<thead>
+									<tr>
+										<th rowspan="2" width="30%">Nama Pegawai</th>
+										<th rowspan="2" width="10%">Tanggal Closing</th>
+										<th name="tdDynamic" width="60%">{{namaBulan}}</th>
+									</tr>
+									<tr>
+										<ng-container *ngIf="listPegawaiView.length != 0">
+											<th style="width: 20px" *ngFor="let item of listTanggal">
+												{{item.id}}
+											</th>
+										</ng-container>
+									</tr>
+								</thead>
+								<tbody>
+									<tr *ngIf="blockData == true" style="height: 40px; background: #ffffff">
+										<td name="tdDynamic" style="text-align: center;" colspan="3">
+											<p-progressSpinner [style]="{width: '40px', height: '40px'}"></p-progressSpinner>
+										</td>
+									</tr>
+									<tr *ngIf="listPegawaiView.length == 0 && blockData == false">
+										<td name="tdDynamic" colspan="3" style="text-align: center;">
+											{{'frmJadwalKerjaPegawai_dataTidakDitemukan'| translate}}
+										</td>
+									</tr>
+									<tr *ngFor="let item of listPegawaiView">
+										<td>{{item.namaLengkap}}</td>
+										<td>
+											<span *ngIf="item.tglClosing !== null">
+												{{item.tglClosing * 1000 | date:'dd MMM yyyy'}}
+											</span>
+											<span *ngIf="item.tglClosing == null">-</span>
+										</td>
+										<td *ngFor="let tanggal of item.jadwal">
+											<div *ngIf="tanggal.kdKelompokShift == dataFixed.kdKelompokShiftNonShift && tanggal.kdShift != dataFixed.shiftLibur.id.kode && tanggal.isCuti == false"
+											 class="nonShift" >{{tanggal.kodeExternal}}</div>
+
+											<div *ngIf="tanggal.kdShift == dataFixed.shiftLibur.id.kode && tanggal.kdKelompokShift == dataFixed.kdKelompokShiftNonShift && tanggal.isCuti == false"
+											 class="libur" >{{tanggal.kodeExternal}}</div>
+
+											<div *ngIf="tanggal.isCuti == true && tanggal.isLibur == true && tanggal.isIzinSakit == false" class="status" >C</div>
+
+											<div *ngIf="tanggal.isCuti == true && tanggal.isLibur == true && tanggal.isIzinSakit == true" class="nonShift" >{{tanggal.kodeExternal}}</div>
+
+											<div *ngIf="tanggal.isCuti == true && tanggal.isLibur == false && tanggal.isIzinSakit == false && tanggal.kdKelompokShift == dataFixed.kdKelompokShiftNonShift"
+											 class="status" >C</div>
+
+											<div *ngIf="tanggal.isCuti == true && tanggal.isLibur == false && tanggal.isIzinSakit == true && tanggal.kdKelompokShift == dataFixed.kdKelompokShiftNonShift"
+											 class="nonShift" >{{tanggal.kodeExternal}}</div>
+											<!-- Shift -->
+											<div *ngIf="tanggal.isCuti == false && tanggal.isLibur == false &&tanggal.kdKelompokShift != null && tanggal.kdKelompokShift != dataFixed.kdKelompokShiftNonShift && tanggal.kdShift != dataFixed.shiftLibur.id.kode && tanggal.isCuti == false"
+											 (click)="changeShift1(item, tanggal)" class="shift" >{{tanggal.kodeExternal}}</div>
+											<!-- tengah periode -->
+											<div *ngIf="tanggal.isCuti == false && tanggal.isLibur == false && tanggal.kdShift == dataFixed.shiftLibur.id.kode && tanggal.kdKelompokShift != dataFixed.kdKelompokShiftNonShift && tanggal.kdKelompokShift == null"
+											 class="ditengahPeriode" >-</div>
+											<div *ngIf="tanggal.kdKelompokShift == null && tanggal.kdShift != dataFixed.shiftLibur.id.kode && tanggal.kdKelompokShift != dataFixed.kdKelompokShiftNonShift && tanggal.isCuti == false"
+											 class="err" >-</div>
+
+											<div *ngIf="tanggal.isCuti == true && tanggal.isCutiSet == true &&
+												tanggal.isLibur == false && tanggal.isIzinSakit == false && 
+												tanggal.kdKelompokShift != null && 
+												tanggal.kdKelompokShift != dataFixed.kdKelompokShiftNonShift"
+											 (click)="changeShift1(item, tanggal)" class="status">C</div>
+											<div *ngIf="tanggal.isCuti == true && tanggal.isCutiSet == true &&
+												tanggal.isLibur == false && tanggal.isIzinSakit == true && 
+												tanggal.kdKelompokShift != null && 
+												tanggal.kdKelompokShift != dataFixed.kdKelompokShiftNonShift && tanggal.kdShift != dataFixed.shiftLibur.id.kode"
+											 (click)="changeShift1(item, tanggal)" class="shift" >{{tanggal.kodeExternal}}</div>
+											<div *ngIf="tanggal.isCuti == true && tanggal.isCutiSet == true &&
+												tanggal.isLibur == false && tanggal.isIzinSakit == true && 
+												tanggal.kdKelompokShift != null && 
+												tanggal.kdKelompokShift != dataFixed.kdKelompokShiftNonShift && tanggal.kdShift == dataFixed.shiftLibur.id.kode"
+											 (click)="changeShift1(item, tanggal)" class="libur">{{tanggal.kodeExternal}}</div>
+
+											<div *ngIf="tanggal.isCuti == false && tanggal.isCutiSet == true && tanggal.isLibur == false && tanggal.kdShift == dataFixed.shiftLibur.id.kode && tanggal.kdKelompokShift != dataFixed.kdKelompokShiftNonShift && tanggal.kdKelompokShift !== null"
+											 (click)="changeShift1(item, tanggal)" class="libur">{{tanggal.kodeExternal}}</div>
+
+											<div *ngIf="tanggal.isCuti == false && tanggal.isCutiSet == true && tanggal.isLibur == true && tanggal.kdShift == dataFixed.shiftLibur.id.kode && tanggal.kdKelompokShift != dataFixed.kdKelompokShiftNonShift "
+											 (click)="changeShift1(item, tanggal)" class="libur">{{tanggal.kodeExternal}}</div>
+
+											<div *ngIf="tanggal.isCuti == false && tanggal.isCutiSet == false && tanggal.isLibur == true && tanggal.kdShift == dataFixed.shiftLibur.id.kode && tanggal.kdKelompokShift != dataFixed.kdKelompokShiftNonShift "
+											 (click)="changeShift1(item, tanggal)" class="libur">{{tanggal.kodeExternal}}</div>
+
+											<div *ngIf="tanggal.isCuti == false && tanggal.isCutiSet == false && tanggal.isLibur == false && tanggal.kdShift == dataFixed.shiftLibur.id.kode && tanggal.kdKelompokShift != dataFixed.kdKelompokShiftNonShift && tanggal.kdKelompokShift !== null"
+											 (click)="changeShift1(item, tanggal)" class="libur">{{tanggal.kodeExternal}}</div>
+
+
+											<div *ngIf="tanggal.isCuti == true && tanggal.isCutiSet == true &&
+												 tanggal.isLibur == true && tanggal.isIzinSakit == false && 
+												 tanggal.kdKelompokShift != null && 
+												 tanggal.kdKelompokShift != dataFixed.kdKelompokShiftNonShift 
+												 && tanggal.kdShift != dataFixed.shiftLibur.id.kode"
+											 (click)="changeShift1(item, tanggal)" class="status" >{{tanggal.kodeExternal}}</div>
+
+											<div *ngIf="tanggal.isCuti == true && tanggal.isCutiSet == true &&
+												 tanggal.isLibur == true && tanggal.isIzinSakit == true && 
+												 tanggal.kdKelompokShift != null && 
+												 tanggal.kdKelompokShift != dataFixed.kdKelompokShiftNonShift 
+												 && tanggal.kdShift != dataFixed.shiftLibur.id.kode"
+											 (click)="changeShift1(item, tanggal)" class="shift" >{{tanggal.kodeExternal}}</div>
+
+											<div *ngIf="tanggal.isCuti == false && 
+												 tanggal.isLibur == true && 
+												 tanggal.kdKelompokShift != null && 
+												 tanggal.kdKelompokShift != dataFixed.kdKelompokShiftNonShift 
+												 && tanggal.kdShift != dataFixed.shiftLibur.id.kode"
+											 (click)="changeShift1(item, tanggal)" class="shift" >{{tanggal.kodeExternal}}</div>
+										</td>
+									</tr>
+								</tbody>
+								<tfoot>
+									<tr>
+										<td colspan="2">
+											{{'frmJadwalKerjaPegawai_keterangan'| translate}}
+										</td>
+										<td name="tdDynamic">
+											<span *ngFor="let list of listData">
+												<div class="{{list.warna.replace('fill','foo')}}" style="font-size:10px;">{{list.kode}}</div>
+												<div class="footext" style="width:130px">{{list.namaShift}}({{list.jamMasuk}}-{{list.jamPulang}})</div>
+											</span>
+										</td>
+									</tr>
+								</tfoot>
+							</table>
+						</div>
+
+						<div class="ui-g-12 ui-md-2">
+							<button pButton type="button" label="{{'frmJadwalKerjaPegawai_btnDownloadTemplate'|translate}}" icon="fa-download" (click)="downloadExcel()"></button>
+						</div>
+						<div class="ui-g-12 ui-md-6">
+							<p-fileUpload uploadLabel="Import" name="myfile[]" mode="advanced" customUpload="true" [showCancelButton]="false" accept=".xlsx"
+							 maxFileSize="1000000" (uploadHandler)="handleFileSelect($event)"></p-fileUpload>
+						</div>
+						<!-- <div class="ui-g-12 ui-md-1"></div> -->
+
+					</div>
+					<div class="ui-g-7 ui-md-2 ui-md-offset-8">
+						<button pButton type="button" label="{{'frmJadwalKerjaPegawai_btnBatal'|translate}}" icon="fa-close" (click)="ngOnInit()"></button>
+					</div>
+					<div class="ui-g-7 ui-md-2">
+						<button pButton type="button" label="{{'frmJadwalKerjaPegawai_btnSimpan'|translate}}" icon="fa-save" (click)="simpan()"
+						 [disabled]="disableButton"></button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
