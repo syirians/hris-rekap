@@ -1,0 +1,435 @@
+<div class="ui-fluid">
+	<div class="ui-g">
+		<div class="ui-g-12 ui-md-5" id="hide">
+		</div>
+		<div class="ui-g-12  ui-md-{{uiGrid}}">
+			<app-proses-penggajian></app-proses-penggajian>
+			<p-confirmDialog></p-confirmDialog>
+			<div #parentSpan class="card card-w-title">
+				<h1>{{'frmRekapitulasiDanPerhitunganAbsensi_title'| translate}}</h1>
+				<div class="ui-g form-group">
+					<p-dialog header="{{'frmRekapitulasiDanPerhitunganAbsensi_editRekap'| translate}}" [resizable]="false" responsive="true"
+					 showEffect="fade" modal="modal" [(visible)]="dialogEditRekap" width="300" height="300">
+						<form [formGroup]="formEdit">
+							<div class="ui-g form-group" style="margin-bottom: 16px;">
+								<div class="ui-g-12 ui-md-12">
+									<label>{{'frmRekapitulasiDanPerhitunganAbsensi_tanggal'|translate}}</label>
+									<app-calender dateFormat="dd M yy" formControlName="tanggal" [showTime]="true" [monthNavigator]="true"
+									 [yearNavigator]="true" yearRange="2000:2030" [showIcon]="true"></app-calender>
+								</div>
+								<div class="ui-g-12 ui-md-12">
+									<label>{{'frmRekapitulasiDanPerhitunganAbsensi_jamMasuk'|translate}}</label>
+									<app-calender formControlName="tanggalMasuk" [timeOnly]="true"></app-calender>
+								</div>
+								<div class="ui-g-12 ui-md-12">
+									<label>{{'frmRekapitulasiDanPerhitunganAbsensi_jamKeluar'|translate}}</label>
+									<app-calender formControlName="tanggalKeluar" [timeOnly]="true"></app-calender>
+								</div>
+								<!-- <div class="ui-g-12 ui-md-12">
+								<label>{{'frmRekapitulasiDanPerhitunganAbsensi_statusAbsensi'|translate}}</label>
+								<p-dropdown formControlName="kdStatusAbsensi" [options]="listStatusAbsensi" [autoWidth]="false"></p-dropdown>
+							</div> -->
+								<div class="ui-g-12 ui-md-12">
+									<p-footer>
+										<button type="button" pButton icon="fa-check" (click)="simpanRekapEdit()" label="{{'frmRekapitulasiDanPerhitunganAbsensi_btnSimpan'|translate}}"></button>
+									</p-footer>
+								</div>
+							</div>
+						</form>
+					</p-dialog>
+					<p-dialog header="{{'frmRekapitulasiDanPerhitunganAbsensi_editStatusPegawai'| translate}}" [resizable]="false"
+					 responsive="true" showEffect="fade" modal="modal" [(visible)]="dialogEditStatusPegawai" width="300">
+						<div class="ui-g form-group" style="margin-bottom: 16px;">
+							<div class="ui-g-12 ui-md-12">
+								<label>{{'frmRekapitulasiDanPerhitunganAbsensi_tanggal'|translate}}</label>
+								<app-calender dateFormat="dd M yy" [(ngModel)]="tglStatusAbsensi" [showTime]="true" [monthNavigator]="true"
+								 [yearNavigator]="true" yearRange="2000:2030" [showIcon]="true" disabled></app-calender>
+							</div>
+							<div class="ui-g-12 ui-md-12">
+								<label>{{'frmRekapitulasiDanPerhitunganAbsensi_statusPegawai'|translate}}</label>
+								<p-dropdown placeholder="Pilih Status Absensi" [(ngModel)]="statusPegawai" [options]="listStatusPegawai"
+								 [autoWidth]="false" appendTo="body" [style]="{'width':'100%'}" optionLabel="namaStatus"></p-dropdown>
+							</div>
+							<div class="ui-g-12 ui-md-12">
+								<p-footer>
+									<button [disabled]="buttonAktif" type="button" pButton icon="fa-check" (click)="simpanStatusPegawai()" label="{{'frmRekapitulasiDanPerhitunganAbsensi_btnSimpan'|translate}}"></button>
+								</p-footer>
+							</div>
+						</div>
+					</p-dialog>
+					<p-sidebar [(visible)]="sidebar" id="sidebar" (onShow)="showBar()" (onHide)="hideBar()" [style]="styleSidebar">
+						<div class="ui-g-12 ui-md-12">
+							<label>{{'frmRekapitulasiDanPerhitunganAbsensi_periodeRekapAbsensi'|translate}}</label>
+							<p-dropdown id="dropdown" filter="filter" [(ngModel)]="kdPeriodeHead" [options]="listPeriodeHead" [autoWidth]="false"
+							 (onChange)="getKode($event)"></p-dropdown>
+						</div>
+						<div class="ui-g-12 ui-md-12">
+							<p-dataTable [value]="listPeriode" [rows]="20" [paginator]="true" [rowsPerPageOptions]="[5,10,20]" selectionMode="single"
+							 [(selection)]="selectedPeriode" scrollable="true" (onRowSelect)="pilihPeriode($event)">
+								<p-column field="namaPeriode" header="{{'frmRekapitulasiDanPerhitunganAbsensi_periode'|translate}}" [style]="{'width':'200px'}"></p-column>
+								<p-column field="tglHistori" header="{{'frmRekapitulasiDanPerhitunganAbsensi_tanggalAwalRekap'|translate}}"
+								 [style]="{'width':'100px'}">
+									<ng-template pTemplate="body" let-status="rowData">
+										<span *ngIf="status.tglHistori != null">{{status.tglHistori * 1000 | date:'dd MMM yyyy'}}</span>
+										<span *ngIf="status.tglHistori == null">-</span>
+									</ng-template>
+								</p-column>
+								<p-column field="tglClosing" header="{{'frmPayroll_tanggalClosing'|translate}}" [style]="{'width':'100px'}">
+									<ng-template pTemplate="body" let-status="rowData">
+										<span *ngIf="status.tglClosing != null">{{status.tglClosing * 1000 | date:'dd MMM yyyy'}}</span>
+										<span *ngIf="status.tglClosing == null">-</span>
+									</ng-template>
+								</p-column>
+							</p-dataTable>
+						</div>
+					</p-sidebar>
+					<div class="ui-g-12 ui-md-{{periodeDiv}}">
+						<button type="button" (click)="showBar()" label="{{'periode'|translate}}" pButton icon="{{iconSideBar}}"></button>
+					</div>
+					<div class="ui-g-12 ui-md-1 ui-md-offset-11">
+					</div>
+					<div class="ui-g-12 ui-md-3">
+						<label>{{'frmRekapitulasiDanPerhitunganAbsensi_Cari Berdasarkan'|translate}}</label>
+						<br>
+						<div class="ui-g-12 ui-md-12">
+							<p-checkbox name="group2" binary="true" label="{{'frmRekapitulasiDanPerhitunganAbsensi_pegawai'|translate}}"
+							 [(ngModel)]="byPegawai" (onChange)="checkPegawai($event)"></p-checkbox>
+							<p-dropdown [filter]="true" filterBy="label" [(ngModel)]="kdPegawai" [options]="listPegawai" [autoWidth]="false"
+							 (ngModelChange)="pilihPegawai($event)" [disabled]="!byPegawai"></p-dropdown>
+						</div>
+						<div class="ui-g-12 ui-md-12">
+							<p-checkbox name="group2" binary="true" label="{{'frmRekapitulasiDanPerhitunganAbsensi_unitKerja'|translate}}"
+							 [(ngModel)]="byRuangan" (onChange)="checkRuangan($event)"></p-checkbox>
+							<p-dropdown [filter]="true" filterBy="label" [(ngModel)]="kdRuangan" [options]="listRuangan" [autoWidth]="false"
+							 (onChange)="cariPegawai($event)" [disabled]="!byRuangan"></p-dropdown>
+						</div>
+						<div class="ui-g-12 ui-md-4 ui-md-offset-8">
+							<br />
+							<button pButton type="button" icon="fa-search" label="{{'frmRekapitulasiDanPerhitunganAbsensi_btnTampilkan'|translate}}"
+							 (click)="tampilkan()"></button>
+						</div>
+					</div>
+					<div class="ui-g-12 ui-md-9 ui-g-nopad">
+						<div class="ui-g-12 ui-md-4">
+							<br>
+							<form [formGroup]="form">
+								<div class="ui-g form-group">
+									<div class="ui-g-12 ui-md-12">
+										<label for="nik">{{'frmRekapitulasiDanPerhitunganAbsensi_NIK'| translate}}</label>
+										<input id="nik" type="text" formControlName="nik" pInputText />
+									</div>
+									<div class="ui-g-12 ui-md-12">
+										<label for="namaPegawai">{{'frmRekapitulasiDanPerhitunganAbsensi_Nama Pegawai'| translate}}</label>
+										<input id="namaPegawai" formControlName="namaPegawai" type="text" pInputText />
+									</div>
+									<div class="ui-g-12 ui-md-12" hidden="true">
+										<label for="jenisKelamin">{{'frmRekapitulasiDanPerhitunganAbsensi_jenisKelamin'| translate}}</label>
+										<input id="jenisKelamin" formControlName="jenisKelamin" type="text" pInputText />
+									</div>
+								</div>
+							</form>
+						</div>
+						<div class="ui-g-12 ui-md-4">
+							<br>
+							<form [formGroup]="form">
+								<div class="ui-g form-group">
+									<div class="ui-g-12 ui-md-12">
+										<label for="tanggalGabung">{{'frmRekapitulasiDanPerhitunganAbsensi_tanggalGabung'| translate}}</label>
+										<app-calender dateFormat="dd M yy" [monthNavigator]="true" [yearNavigator]="true" yearRange="2000:2100"
+										 formControlName="tanggalGabung" [showIcon]="true" dateFormat="dd MM yy"></app-calender>
+									</div>
+									<div class="ui-g-12 ui-md-12">
+										<label for="unitKerja">{{'frmRekapitulasiDanPerhitunganAbsensi_Unit Kerja'| translate}}</label>
+										<input id="unitKerja" type="text" formControlName="unitKerja" pInputText />
+									</div>
+								</div>
+							</form>
+						</div>
+						<div class="ui-g-12 ui-md-4">
+							<br>
+							<form [formGroup]="form">
+								<div class="ui-g form-group">
+									<div class="ui-g-12 ui-md-12">
+										<label for="jabatan">{{'frmRekapitulasiDanPerhitunganAbsensi_Jabatan'| translate}}</label>
+										<input id="jabatan" type="text" formControlName="jabatan" pInputText />
+									</div>
+									<div class="ui-g-12 ui-md-12">
+										<label for="kategoriPegawai">{{'frmRekapitulasiDanPerhitunganAbsensi_kategoriPegawai'| translate}}</label>
+										<input id="kategoriPegawai" type="text" formControlName="kategoriPegawai" pInputText />
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+					<div class="ui-g-12 ui-md-12" *ngIf="namaPeriode !== null">
+						<p style="text-align: center;"><b>{{'frmRekapitulasiDanPerhitunganAbsensi_periodeRekapAbsensi'|translate}}</b></p>
+						<p style="text-align: center;"><b>{{namaPeriode}}</b></p>
+					</div>
+					<div class="ui-g-12 ui-md-12 btn-grid">
+						<p-dataTable [(first)]="first" [value]="listData" [rows]="10" [paginator]="true" [rowsPerPageOptions]="[5,10,20]"
+						 selectionMode="single" [(selection)]="selected" scrollable="true" (onRowSelect)="onRowSelect($event)" styleClass="borderless"
+						 [editable]="true">
+							<p-headerColumnGroup>
+								<p-row>
+									<p-column header="{{'frmRekapitulasiDanPerhitunganAbsensi_nik'|translate}}" rowspan="2" [style]="{'width':'150px','text-align': 'center','border-top': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"></p-column>
+									<p-column header="{{'frmRekapitulasiDanPerhitunganAbsensi_namaPegawai'|translate}}" rowspan="2" [style]="{'width':'200px','white-space':'nowrap','text-align': 'center','border-top': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"></p-column>
+									<p-column header="{{'frmRekapitulasiDanPerhitunganAbsensi_jabatan'|translate}}" rowspan="2" [style]="{'width':'200px','white-space':'nowrap','text-align': 'center','border-top': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"></p-column>
+									<p-column header="{{'frmRekapitulasiDanPerhitunganAbsensi_unitKerja'|translate}}" rowspan="2" [style]="{'width':'200px','white-space':'nowrap','text-align': 'center','border-top': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"></p-column>
+									<p-column header="{{'frmRekapitulasiDanPerhitunganAbsensi_tanggal'|translate}}" rowspan="2" [style]="{'width':'150px','text-align': 'center','border-top': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"></p-column>
+									<p-column header="{{'frmRekapitulasiDanPerhitunganAbsensi_shift'|translate}}" rowspan="2" [style]="{'width':'100px','text-align': 'center','border-top': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"></p-column>
+									<p-column header="{{'frmRekapitulasiDanPerhitunganAbsensi_jadwal'|translate}}" colspan="2" [style]="{'width':'140px','text-align': 'center','border-top': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"></p-column>
+									<p-column header="{{'frmRekapitulasiDanPerhitunganAbsensi_absensi'|translate}}" colspan="2" [style]="{'width':'140px','text-align': 'center','border-top': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"></p-column>
+									<p-column header="{{'frmRekapitulasiDanPerhitunganAbsensi_break'|translate}}" colspan="2" [style]="{'width':'140px','text-align': 'center','border-top': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"></p-column>
+									<p-column header="{{'frmRekapitulasiDanPerhitunganAbsensi_masuk'|translate}}" colspan="2" [style]="{'width':'140px','text-align': 'center','border-top': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"></p-column>
+									<p-column header="{{'frmRekapitulasiDanPerhitunganAbsensi_pulang'|translate}}" colspan="2" [style]="{'width':'140px','text-align': 'center','border-top': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"></p-column>
+									<p-column header="{{'rmRekapitulasiDanPerhitunganAbsensi_jamProduktif'|translate}}" rowspan="2" [style]="{'width':'110px','text-align': 'center','border-top': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"></p-column>
+									<p-column header="{{'frmRekapitulasiDanPerhitunganAbsensi_jamLembur'|translate}}" rowspan="2" [style]="{'width':'110px','text-align': 'center','border-top': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"></p-column>
+									<p-column header="{{'Koreksi Jam'|translate}}" rowspan="2" [style]="{'width':'100px','border-top': '1px solid #0aa699','text-align': 'center','border-bottom': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"></p-column>
+									<p-column header="{{'frmRekapitulasiDanPerhitunganAbsensi_statusAbsensi'|translate}}" rowspan="2" [style]="{'width':'150px','text-align': 'center','border-top': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"></p-column>
+									<p-column header="{{'frmRekapitulasiDanPerhitunganAbsensi_statusKehadiran'|translate}}" rowspan="2" [style]="{'width':'120px','text-align': 'center','border-top': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"></p-column>
+									<p-column header="{{'Status Personal'|translate}}" rowspan="2" [style]="{'width':'200px','text-align': 'center','border-top': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"></p-column>
+								</p-row>
+								<p-row>
+									<p-column header="{{'frmRekapitulasiDanPerhitunganAbsensi_masuk'|translate}}" [style]="{'width':'70px','text-align': 'center','border-top': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"></p-column>
+									<p-column header="{{'frmRekapitulasiDanPerhitunganAbsensi_pulang'|translate}}" [style]="{'width':'70px','text-align': 'center','border-top': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"></p-column>
+									<p-column header="{{'frmRekapitulasiDanPerhitunganAbsensi_masuk'|translate}}" [style]="{'width':'70px','text-align': 'center','border-top': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"></p-column>
+									<p-column header="{{'frmRekapitulasiDanPerhitunganAbsensi_pulang'|translate}}" [style]="{'width':'70px','text-align': 'center','border-top': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"></p-column>
+									<p-column header="{{'frmRekapitulasiDanPerhitunganAbsensi_mulai'|translate}}" [style]="{'width':'70px','text-align': 'center','border-top': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"></p-column>
+									<p-column header="{{'frmRekapitulasiDanPerhitunganAbsensi_selesai'|translate}}" [style]="{'width':'70px','text-align': 'center','border-top': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"></p-column>
+									<p-column header="{{'frmRekapitulasiDanPerhitunganAbsensi_+'|translate}} {{'(menit)'|translate}}" [style]="{'width':'70px','text-align': 'center','border-top': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"></p-column>
+									<p-column header="{{'frmRekapitulasiDanPerhitunganAbsensi_-'|translate}} {{'(menit)'|translate}}" [style]="{'width':'70px','text-align': 'center','border-top': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"></p-column>
+									<p-column header="{{'frmRekapitulasiDanPerhitunganAbsensi_+'|translate}} {{'(menit)'|translate}}" [style]="{'width':'70px','text-align': 'center','border-top': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"></p-column>
+									<p-column header="{{'frmRekapitulasiDanPerhitunganAbsensi_-'|translate}} {{'(menit)'|translate}}" [style]="{'width':'70px','text-align': 'center','border-top': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"></p-column>
+								</p-row>
+							</p-headerColumnGroup>
+							<p-column field="nik" [style]="{'width':'150px','text-align': 'center','border-bottom': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"
+							 [editable]="false"></p-column>
+							<p-column field="namaLengkap" [style]="{'width':'200px','white-space':'nowrap','border-bottom': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699',' border-bottom': '1px solid #0aa699'}"
+							 [editable]="false"></p-column>
+							<p-column field="namaJabatan" [style]="{'width':'200px','white-space':'nowrap','text-align': 'center','border-bottom': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"
+							 [editable]="false"></p-column>
+							<p-column field="namaRuangan" [style]="{'width':'200px','white-space':'nowrap','text-align': 'center','border-bottom': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"
+							 [editable]="false"></p-column>
+							<p-column field="tanggal" [style]="{'width':'150px','text-align': 'center','border-bottom': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"
+							 [editable]="false">
+								<ng-template pTemplate="body" let-absen="rowData">
+									<span *ngIf="absen.isTglMerah==true" style="color:red">{{absen.tanggal * 1000 | date:'dd MMM yyyy'}}</span>
+									<span *ngIf="absen.isTglMerah!=true">{{absen.tanggal * 1000 | date:'dd MMM yyyy'}}</span>
+								</ng-template>
+							</p-column>
+							<p-column field="namaShift" [style]="{'width':'100px','text-align': 'center','border-bottom': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"
+							 [editable]="false">
+								<ng-template pTemplate="body" let-absen="rowData">
+									<span *ngIf="absen.tglKeluarPegawai != null && (absen.isResign==true || absen.isPhk==true  || absen.isPensiun==true || absen.tglMasukPerusahaan > absen.tglKalendar || absen.tglKeluarPegawai <= absen.tglKalendar )">-</span>
+									<span *ngIf="absen.tglKeluarPegawai != null && (absen.isResign!=true && absen.isPhk!=true  && absen.isPensiun!=true && absen.tglMasukPerusahaan <= absen.tglKalendar && absen.tglKeluarPegawai > absen.tglKalendar)">{{absen.namaShift}}</span>
+									<span *ngIf="absen.tglKeluarPegawai == null && (absen.isResign!=true && absen.isPhk!=true  && absen.isPensiun!=true && absen.tglMasukPerusahaan <= absen.tglKalendar)">{{absen.namaShift}}</span>
+								</ng-template>
+							</p-column>
+							<p-column field="jamMasukView" [style]="{'width':'70px','text-align': 'center','border-bottom': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"
+							 [editable]="false">
+								<ng-template pTemplate="body" let-absen="rowData">
+									<span *ngIf="absen.tglKeluarPegawai != null && (absen.isResign==true || absen.isPhk==true  || absen.isPensiun==true || absen.tglMasukPerusahaan > absen.tglKalendar || absen.tglKeluarPegawai <= absen.tglKalendar )">-</span>
+									<span *ngIf="absen.tglKeluarPegawai != null && (absen.isResign!=true && absen.isPhk!=true  && absen.isPensiun!=true && absen.tglMasukPerusahaan <= absen.tglKalendar && absen.tglKeluarPegawai > absen.tglKalendar)">{{absen.jamMasukView}}</span>
+									<span *ngIf="absen.tglKeluarPegawai == null && (absen.isResign!=true && absen.isPhk!=true  && absen.isPensiun!=true && absen.tglMasukPerusahaan <= absen.tglKalendar)">{{absen.jamMasukView}}</span>
+								</ng-template>
+							</p-column>
+							<p-column field="jamPulangView" [style]="{'width':'70px','text-align': 'center','border-bottom': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"
+							 [editable]="false">
+								<ng-template pTemplate="body" let-absen="rowData">
+									<span *ngIf="absen.tglKeluarPegawai != null && (absen.isResign==true || absen.isPhk==true  || absen.isPensiun==true || absen.tglMasukPerusahaan > absen.tglKalendar || absen.tglKeluarPegawai <= absen.tglKalendar )">-</span>
+									<span *ngIf="absen.tglKeluarPegawai != null && (absen.isResign!=true && absen.isPhk!=true  && absen.isPensiun!=true && absen.tglMasukPerusahaan <= absen.tglKalendar && absen.tglKeluarPegawai > absen.tglKalendar)">{{absen.jamPulangView}}</span>
+									<span *ngIf="absen.tglKeluarPegawai == null && (absen.isResign!=true && absen.isPhk!=true  && absen.isPensiun!=true && absen.tglMasukPerusahaan <= absen.tglKalendar)">{{absen.jamPulangView}}</span>
+								</ng-template>
+							</p-column>
+							<p-column field="tglMasukView" [style]="{'width':'70px','text-align': 'center','border-bottom': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"
+							 [editable]="false">
+								<ng-template pTemplate="body" let-masuk="rowData">
+									<span *ngIf="masuk.tglMasuk > masuk.jamMasuk && masuk.tglMasuk != '-'" style="color:red">{{masuk.tglMasukView}}</span>
+									<span *ngIf="masuk.tglMasuk <= masuk.jamMasuk && masuk.tglMasuk != '-'">{{masuk.tglMasukView}}</span>
+									<span *ngIf="masuk.tglMasuk == '-' && masuk.namaShift != 'Libur' && !masuk.isCuti && !masuk.isDinas" style="color:red">-</span>
+									<span *ngIf="masuk.tglMasuk == '-' && (masuk.isCuti || masuk.isDinas)" style="color:red">-</span>
+									<span *ngIf="masuk.tglMasuk == '-' && masuk.namaShift == 'Libur' && !masuk.isCuti && !masuk.isDinas" style="color:red">{{masuk.tglMasukView}}</span>
+								</ng-template>
+							</p-column>
+							<p-column field="tglKeluarView" [style]="{'width':'70px','text-align': 'center','border-bottom': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"
+							 [editable]="false">
+								<ng-template pTemplate="body" let-keluar="rowData">
+									<span *ngIf="keluar.tglKeluar < keluar.jamPulang && keluar.tglKeluar != '-'" style="color:red">{{keluar.tglKeluarView}}</span>
+									<span *ngIf="keluar.tglKeluar >= keluar.jamPulang && keluar.tglKeluar != '-'">{{keluar.tglKeluarView}}</span>
+									<span *ngIf="keluar.tglKeluar == '-' && keluar.namaShift != 'Libur' && !keluar.isCuti && !keluar.isDinas"
+									 style="color:red">-</span>
+									<span *ngIf="keluar.tglKeluar == '-' && (keluar.isCuti || keluar.isDinas) " style="color:red">-</span>
+									<span *ngIf="keluar.tglKeluar == '-' && keluar.namaShift == 'Libur' && !keluar.isCuti && !keluar.isDinas"
+									 style="color:red">{{keluar.tglKeluarView}}</span>
+								</ng-template>
+							</p-column>
+							<p-column field="jamBreakAwal" [style]="{'width':'70px','text-align': 'center','border-bottom': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"
+							 footer="{{'frmRekapitulasiDanPerhitunganAbsensi_jumlah'| translate}}" [editable]="false">
+								<ng-template pTemplate="body" let-absen="rowData">
+									<span *ngIf="absen.tglKeluarPegawai != null && (absen.isResign==true || absen.isPhk==true  || absen.isPensiun==true || absen.tglMasukPerusahaan > absen.tglKalendar || absen.tglKeluarPegawai <= absen.tglKalendar )">-</span>
+									<span *ngIf="absen.tglKeluarPegawai != null && (absen.isResign!=true && absen.isPhk!=true  && absen.isPensiun!=true && absen.tglMasukPerusahaan <= absen.tglKalendar && absen.tglKeluarPegawai > absen.tglKalendar)">{{absen.jamBreakAwal}}</span>
+									<span *ngIf="absen.tglKeluarPegawai == null && (absen.isResign!=true && absen.isPhk!=true  && absen.isPensiun!=true && absen.tglMasukPerusahaan <= absen.tglKalendar)">{{absen.jamBreakAwal}}</span>
+								</ng-template>
+							</p-column>
+							<p-column field="jamBreakAkhir" [style]="{'width':'70px','text-align': 'center','border-bottom': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"
+							 footer=":" [editable]="false">
+								<ng-template pTemplate="body" let-absen="rowData">
+									<span *ngIf="absen.tglKeluarPegawai != null && (absen.isResign==true || absen.isPhk==true  || absen.isPensiun==true || absen.tglMasukPerusahaan > absen.tglKalendar || absen.tglKeluarPegawai <= absen.tglKalendar )">-</span>
+									<span *ngIf="absen.tglKeluarPegawai != null && (absen.isResign!=true && absen.isPhk!=true  && absen.isPensiun!=true && absen.tglMasukPerusahaan <= absen.tglKalendar && absen.tglKeluarPegawai > absen.tglKalendar)">{{absen.jamBreakAkhir}}</span>
+									<span *ngIf="absen.tglKeluarPegawai == null && (absen.isResign!=true && absen.isPhk!=true  && absen.isPensiun!=true && absen.tglMasukPerusahaan <= absen.tglKalendar)">{{absen.jamBreakAkhir}}</span>
+								</ng-template>
+							</p-column>
+							<p-column field="datangT" [style]="{'width':'70px','text-align': 'center','border-bottom': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"
+							 footer="{{totalT}}" [editable]="false">
+								<ng-template pTemplate="editor" let-col let-row="rowData">
+									<input type="number" pInputText [(ngModel)]="row[col.field]" (ngModelChange)="hitungTotalMasukT()" [min]="row.nilaiMin"
+									 [max]="row.nilaiMax" name="row[col.field]" #row[col.field]="ngModel" appendTo="body" />
+								</ng-template>
+							</p-column>
+							<p-column field="datangM" [style]="{'width':'70px','text-align': 'center','border-bottom': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"
+							 footer="{{totalM}}" [editable]="false">
+								<ng-template pTemplate="body" let-datang="rowData">
+									<span *ngIf="datang.datangM == 0">{{datang.datangM}}</span>
+									<span *ngIf="datang.datangM > 0" style="color:red">{{datang.datangM}}</span>
+								</ng-template>
+								<ng-template pTemplate="editor" let-col let-row="rowData">
+									<input type="number" pInputText [(ngModel)]="row[col.field]" (ngModelChange)="hitungTotalMasukM()" [min]="row.nilaiMin"
+									 [max]="row.nilaiMax" name="row[col.field]" #row[col.field]="ngModel" appendTo="body" />
+								</ng-template>
+							</p-column>
+							<p-column field="pulangT" [style]="{'width':'70px','text-align': 'center','border-bottom': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"
+							 footer="{{totalPulangT}}" [editable]="false">
+								<ng-template pTemplate="editor" let-col let-row="rowData">
+									<input type="number" pInputText [(ngModel)]="row[col.field]" (ngModelChange)="hitungTotalPulangT()" [min]="row.nilaiMin"
+									 [max]="row.nilaiMax" name="row[col.field]" #row[col.field]="ngModel" appendTo="body" />
+								</ng-template>
+							</p-column>
+							<p-column field="pulangM" [style]="{'width':'70px','text-align': 'center','border-bottom': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"
+							 footer="{{totalPulangM}}" [editable]="false">
+								<ng-template pTemplate="body" let-pulang="rowData">
+									<span *ngIf="pulang.pulangM == 0">{{pulang.pulangM}}</span>
+									<span *ngIf="pulang.pulangM > 0" style="color:red">{{pulang.pulangM}}</span>
+								</ng-template>
+								<ng-template pTemplate="editor" let-col let-row="rowData">
+									<input type="number" pInputText [(ngModel)]="row[col.field]" (ngModelChange)="hitungTotalPulangM()" [min]="row.nilaiMin"
+									 [max]="row.nilaiMax" name="row[col.field]" #row[col.field]="ngModel" appendTo="body" />
+								</ng-template>
+							</p-column>
+							<p-column [style]="{'width':'110px','text-align': 'center','border-bottom': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"
+							 footer="" [editable]="false">
+								<ng-template pTemplate="body" let-pulang="rowData">
+									<span *ngIf="pulang.tglKeluarPegawai != null && (pulang.isResign==true || pulang.isPhk==true  || pulang.isPensiun==true || pulang.tglMasukPerusahaan > pulang.tglKalendar || pulang.tglKeluarPegawai <= pulang.tglKalendar )">-</span>
+									<span *ngIf="pulang.tglKeluarPegawai != null && (pulang.isResign!=true && pulang.isPhk!=true  && pulang.isPensiun!=true && pulang.tglMasukPerusahaan <= pulang.tglKalendar && pulang.tglKeluarPegawai > pulang.tglKalendar )">{{pulang.jamProduktifPegawai}}</span>
+									<span *ngIf="pulang.tglKeluarPegawai == null && (pulang.isResign!=true && pulang.isPhk!=true  && pulang.isPensiun!=true && pulang.tglMasukPerusahaan <= pulang.tglKalendar )">{{pulang.jamProduktifPegawai}}</span>
+								</ng-template>
+							</p-column>
+							<p-column [style]="{'width':'110px','text-align': 'center','border-bottom': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"
+							 footer="{{totalJamLembur}}" [editable]="false">
+								<ng-template pTemplate="body" let-pulang="rowData">
+									<span *ngIf="pulang.tglKeluarPegawai != null && (pulang.isResign==true || pulang.isPhk==true  || pulang.isPensiun==true || pulang.tglMasukPerusahaan > pulang.tglKalendar || pulang.tglKeluarPegawai <= pulang.tglKalendar )">-</span>
+									<span *ngIf="pulang.tglKeluarPegawai != null && (pulang.isResign!=true && pulang.isPhk!=true  && pulang.isPensiun!=true && pulang.tglMasukPerusahaan <= pulang.tglKalendar && pulang.tglKeluarPegawai > pulang.tglKalendar )">{{pulang.jamLembur}}</span>
+									<span *ngIf="pulang.tglKeluarPegawai == null && (pulang.isResign!=true && pulang.isPhk!=true  && pulang.isPensiun!=true && pulang.tglMasukPerusahaan <= pulang.tglKalendar )">{{pulang.jamLembur}}</span>
+								</ng-template>
+							</p-column>
+							<p-column field="isKoreksi" [style]="{'width':'100px','text-align': 'center','border-bottom': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"
+							 [editable]="false">
+								<ng-template let-rekap="rowData" pTemplate="body">
+									<span *ngIf="rekap.isKoreksi == true">
+										<button [disabled]="buttonAktif" pButton [disabled]="buttonAktif" type="button" icon="fa-edit" (click)="edit(rekap.tanggal,rekap.kdPegawai,rekap.kdRuangan,rekap.tglMasukAbsensi,rekap.tglKeluarAbsensi, rekap.noHistori)"></button>
+									</span>
+								</ng-template>
+							</p-column>
+
+							<p-column field="statusAbsensi" [style]="{'width':'150px','text-align': 'center','border-bottom': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}">
+								<!-- 
+							<ng-template let-col let-pegawai="rowData" let-ri = "rowIndex" pTemplate="body">
+								 <span>
+								 	{{pegawai.statusAbsensi}}
+								</span>
+								<span *ngIf="pegawai.statusAbsensi == 'Tidak Masuk' ">
+									<button pButton type="button" icon="fa-edit" (click)="editStatusAbsensi(pegawai)"></button>
+								</span>
+							</ng-template> -->
+								<ng-template pTemplate="body" let-pegawai="rowData">
+									<span *ngIf="pegawai.tglKeluarPegawai != null && (pegawai.isResign==true || pegawai.isPhk==true  || pegawai.isPensiun==true || pegawai.tglMasukPerusahaan > pegawai.tglKalendar || pegawai.tglKeluarPegawai <= pegawai.tglKalendar )">-</span>
+									<span *ngIf="pegawai.tglKeluarPegawai != null && (pegawai.isResign!=true && pegawai.isPhk!=true  && pegawai.isPensiun!=true && pegawai.tglMasukPerusahaan <= pegawai.tglKalendar && pegawai.tglKeluarPegawai > pegawai.tglKalendar )">{{pegawai.statusAbsensi}}</span>
+									<span *ngIf="pegawai.tglKeluarPegawai == null && (pegawai.isResign!=true && pegawai.isPhk!=true  && pegawai.isPensiun!=true && pegawai.tglMasukPerusahaan <= pegawai.tglKalendar)">{{pegawai.statusAbsensi}}</span>
+								</ng-template>
+							</p-column>
+							<!-- <p-column field="statusPegawai" [style]="{'width':'120px','text-align': 'center','border-bottom': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"
+							 [editable]="true">
+								<ng-template let-col let-pegawai="rowData" let-ri="rowIndex" pTemplate="body"> 
+									<span *ngIf="pegawai.statusPegawai != pegawai.statusPersonal">
+										{{pegawai.statusPegawai | translate }}
+									</span>
+								</ng-template>
+							</p-column> -->
+							  <p-column field="kodeExternalStatus" [style]="{'width':'120px','text-align': 'center','border-bottom': '1px solid
+								#0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"
+							 [editable]="true"> </p-column> 
+							<p-column field="statusPersonal" [style]="{'width':'180px','text-align': 'left','border-bottom': '1px solid #0aa699','border-left': '1px solid #0aa699','border-right': '1px solid #0aa699','border-bottom': '1px solid #0aa699'}"
+							 [editable]="false">
+								<ng-template let-col let-pegawai="rowData" let-ri="rowIndex" pTemplate="body">
+									<span *ngIf="pegawai.statusPersonal !== undefined 
+									&& pegawai.statusPersonal !== null 
+									&& pegawai.statusPersonal != '' 
+									&& pegawai.statusAbsensi != 'Tidak Ada'">
+
+										<button *ngIf="pegawai.statusPegawai !== undefined 
+										&& pegawai.statusPegawai !== null 
+										&& pegawai.statusPegawai != '' 
+										&& pegawai.statusPegawai != 'Tidak Ada'"									
+										[disabled]="buttonAktif" pButton type="button" icon="fa-close" (click)="batalStatusPegawai(pegawai)"></button>
+									</span>
+									<span *ngIf="pegawai.isResign!=true && pegawai.isPhk!=true  && pegawai.isPensiun!=true && pegawai.tglMasukPerusahaan <= pegawai.tglKalendar">
+										<button [disabled]="buttonAktif" pButton type="button" icon="fa-edit" (click)="editStatusPegawai(pegawai)"></button>
+									</span>
+									<span>
+										{{pegawai.statusPersonal | translate }}
+									</span>
+									<span *ngIf=" (pegawai.statusPersonal === undefined 
+												|| pegawai.statusPersonal === null 
+												|| pegawai.statusPersonal == '' 
+												|| pegawai.statusAbsensi == 'Tidak Ada') 
+												&& pegawai.statusAbsensi == 'Tidak Masuk'
+												&& (pegawai.statusPegawai === undefined 
+												|| pegawai.statusPegawai === null 
+												|| pegawai.statusPegawai == '') ">
+										{{ 'Tanpa Keterangan' | translate }}
+									</span>
+								</ng-template>
+
+							</p-column>
+						</p-dataTable>
+
+					</div>
+					<div class="ui-g-12 ui-md-1 ui-md-offset-9">
+						<button pButton type="button" icon="fa-print" label="{{'frmRekapitulasiDanPerhitunganAbsensi_btnCetak'|translate}}"
+						 (click)="preview()"></button>
+					</div>
+					<div class="ui-g-12 ui-md-1">
+						<button pButton type="button" icon="fa-save" label="{{'frmRekapitulasiDanPerhitunganAbsensi_btnSimpan'|translate}}"
+						 [disabled]="buttonAktif" (click)="onSubmit()"></button>
+					</div>
+					<div class="ui-g-12 ui-md-1">
+						<button pButton type="button" icon="fa-close" label="{{'frmRekapitulasiDanPerhitunganAbsensi_btnBatal'|translate}}"
+						 (click)="reset()"></button>
+					</div>
+				</div>
+				<div class="ui-g-12">
+						<p-fieldset legend="{{'keterangan'|translate}}">
+							
+								<div class="ui-g-12 ui-md-12">
+									<div *ngFor="let dt of status">
+										<div class="ui-g-12 ui-md-2">
+											<label class="labelKiri">{{dt.namaStatus}} ({{dt.kodeExternal}})</label>
+										</div> 
+									</div>		
+								</div>  
+
+						</p-fieldset>
+					</div>
+			</div>
+		</div>
+	</div>
+</div>

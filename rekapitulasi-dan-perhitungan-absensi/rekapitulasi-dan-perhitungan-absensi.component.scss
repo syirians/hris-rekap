@@ -1,0 +1,31 @@
+// .rekap-ui .ui-datatable .ui-datatable-data tr td {
+//     padding: 2px;
+//     border-top: 2px solid #0aa699;
+//     border-bottom: 2px solid #0aa699;
+//     border-right: 2px solid #0aa699;
+//     border-left: 2px solid #0aa699;
+//   }
+// .rekap-ui .ui-datatable .ui-datatable-thead > tr > th {
+//     background-color: #ffffff;
+//     padding: 1px 2px 3px 5px;
+//     color: #777777;
+//     border-right: 2px solid #0aa699;
+//     border-top: 2px solid #0aa699;
+//     border-bottom: 2px solid #0aa699;
+//     border-left: 2px solid #0aa699;
+//     text-align: center;
+//     font-size: 12px;
+//     font-family: 'gadugibold';
+//   }
+
+// .ui-datatable .ui-datatable-data .values1{
+//     border: 1px solid #ff3300;
+//     background-color: #42db13;
+// }
+
+.ui-datatable.borderless .ui-datatable-data tr,
+.ui-datatable.borderless .ui-datatable-data-empty tr,
+.ui-datatable.borderless .ui-datatable-data td,
+.ui-datatable.borderless .ui-datatable-data-empty td {
+    border-style: none;
+}
